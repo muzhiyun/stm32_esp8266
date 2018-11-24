@@ -1,7 +1,8 @@
 #ifndef __USART_H
 #define __USART_H
-#define u16 unsigned long int
-#define u8 unsigned int
+//#define u16 unsigned long int
+//#define u8 unsigned int
+//请无视下面报错   添加宏定义会冲突导致乱码  又不是不能用
 	
 extern void USART1_SendByte(u16 dat);
 extern void USART1Write(u8* data,u16 len);

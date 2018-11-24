@@ -112,6 +112,8 @@ void UART2Test(void)
        {    
 		 while(UART2GetByte(&i))
         {
+				if (i=='0') GPIO_SetBits(GPIOA,GPIO_Pin_1);	  // Ãð;
+				if (i=='1') GPIO_ResetBits(GPIOA,GPIO_Pin_1);	  // ÁÁ;
          USART_SendData(USART2,i);
         }      
        }     

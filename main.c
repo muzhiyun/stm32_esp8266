@@ -1,8 +1,8 @@
 /**************************************************************
 西安石油大学大创项目--无人机管道自动巡检
 基于stm32_esp8266_ov2640
-版本 0.1
-完成日期 2018-11-24 02:27
+版本 0.1.1
+完成日期 2018-11-24 15:11
 修改人：牧之
 ***************************************************************/
 
@@ -25,11 +25,12 @@ void GPIO_Configuration(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
 	/* Configure IO connected to LD1, LD2, LD3 and LD4 leds *********************/	
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11;
+	//GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10 | GPIO_Pin_11;
+	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;    //使用PA1点亮LED
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  	GPIO_Init(GPIOD, &GPIO_InitStructure);
-
+  	GPIO_Init(GPIOA, &GPIO_InitStructure);
+		GPIO_SetBits(GPIOA, GPIO_Pin_1 );	 // 关闭所有LED
 	
 	/***********************************************************************************
 	串口1部分没用   后期删掉
@@ -55,6 +56,7 @@ void GPIO_Configuration(void)
   	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   	GPIO_Init(GPIOA, &GPIO_InitStructure);
+		
 }
 
 //系统中断管理
@@ -109,7 +111,7 @@ void Init_All_Periph(void)
 	//USART1_Configuration();
 	USART2_Configuration();
 	//USART1Write((u8*)"    FireBull  USART_example ",sizeof("    FireBull  USART_example "));
-	//USART2Write((u8*)"    FireBull  USART_example ",sizeof("    FireBull  USART_example "));
+	//USART2Write((u8*)"    FireBull  USART_example ",sizeof("    FireBull  USART_example ")-1);
 }
 
 void Delay(vu32 nCount)
@@ -122,16 +124,16 @@ void Delay(vu32 nCount)
 void SendMessage(void)
 { 
 		
-	Delay(8000000);																																																		//必要延时 等待开机完成
-  USART2Write((u8*)"AT+CWJAP_DEF=\"K2P\",\"19216811\"\r\r\n",sizeof("AT+CWJAP_DEF=\"K2P\",\"19216811\"\r\r\n")-1) ; //AT指令 连接WiFi
-	Delay(32000000);																																																	//必要延时  等待链接WiFi完成	
-	USART2Write((u8*)"AT+CIPSTART=\"TCP\",\"192.168.2.174\",8080\r\r\n",sizeof("AT+CIPSTART=\"TCP\",\"192.168.2.174\",8080\r\r\n")-1) ;		//链接TCP server端
 	Delay(8000000);
-	USART2Write((u8*)"AT+CIPMODE=1\r\r\n",sizeof("AT+CIPMODE=1\r\r\n")-1);					//打开
+  USART2Write((u8*)"AT+CWJAP_DEF=\"K2P\",\"19216811\"\r\r\n",sizeof("AT+CWJAP_DEF=\"K2P\",\"19216811\"\r\r\n")-1) ;
+	Delay(32000000);
+	USART2Write((u8*)"AT+CIPSTART=\"TCP\",\"192.168.2.174\",8080\r\r\n",sizeof("AT+CIPSTART=\"TCP\",\"192.168.2.174\",8080\r\r\n")-1) ;
 	Delay(8000000);
-	USART2Write((u8*)"AT+CIPSEND\r\r\n",sizeof("AT+CIPSEND\r\r\n")-1) ;							//打开透传模式
+	USART2Write((u8*)"AT+CIPMODE=1\r\r\n",sizeof("AT+CIPMODE=1\r\r\n")-1);
 	Delay(8000000);
-	USART2Write((u8*)"Hello World! USART2_Test\r\n",sizeof("Hello WorldUSART2_Test\r\n")-1) ;			//测试信息
+	USART2Write((u8*)"AT+CIPSEND\r\r\n",sizeof("AT+CIPSEND\r\r\n")-1) ;
+	Delay(8000000);
+	USART2Write((u8*)"Hello World! USART2_Test\r\n",sizeof("Hello WorldUSART2_Test\r\n")-1) ;	
 
 }
 
@@ -156,7 +158,10 @@ int main(void)
 	USART2Write((u8*)"go fun in ",sizeof("go fun in ")-1) ;
  while(1)
   {
-		
+		GPIO_ResetBits(GPIOA,GPIO_Pin_1);			  // PA2输出高电平亮
+		//Delay(30);
+		//GPIO_SetBits(GPIOA,GPIO_Pin_1);	  // 灭
+		//Delay(30);
 		UART2Test();				//移植的测试函数 接受立即返回  函数定义位于USART.c
   	}
 }
