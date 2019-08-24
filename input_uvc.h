@@ -24,4 +24,5 @@
 
 extern int uvc_Init();
 extern int imgGet(int fdUsbCam);
+extern void videoLCD(int fdUsbCam,int connfd);
 #endif

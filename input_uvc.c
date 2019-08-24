@@ -1,7 +1,12 @@
 #include "input_uvc.h"
+#include "display_jpg.h"
+#include "http_post.h"
+#include "painter.h"
+
+extern u_int32_t *fbp;
 
 
-int width,height;
+static int width,height;
 
 int uvc_Init()
 {
@@ -100,19 +105,45 @@ int imgGet(int fdUsbCam)
     //char filename[10];
     //int i = 0;
     int filefd = -1;
-    /*for(i=0;i<10;i++)
-    {
-        size = read(fdUsbCam, buff, 1024 * 1024);　　//检测是否和次数有关
-    }*/                                             
+    //for(i=0;i<10;i++)
+    //{
+    //    size = read(fdUsbCam, buff, 1024 * 1024);   //检测是否和次数有关
+    //}                                             
     size = read(fdUsbCam, buff, 1024 * 1024);       
     sleep(3);                                       //确定　和读取时间有关
     size = read(fdUsbCam, buff, 1024 * 1024);
     //sprintf(filename,"%c.jpg",name[i]);
     //filefd = open(filename, O_RDWR | O_CREAT,0666);
-    filefd = open("image.jpg", O_RDWR | O_CREAT,0666);
+    filefd = open("image 22.jpg", O_RDWR | O_CREAT,0666);
     write(filefd, buff, size);
     close(filefd);
+
+    
+    free(buff);
     //printf("%d.jpg finish\n",i);
     //sleep(1);
-    puts("finish 3\n");
+    //puts("finish 3\n");
+}
+
+void videoLCD(int fdUsbCam,int connfd)
+{
+    int size = -1;
+    void *buff = malloc(1024 * 1024);  //分配缓存足以容纳一帧图像
+    int filefd = -1 ;
+
+    while (1)
+    {
+        paintBMP(0,208,"left.bmp");
+        paintBMP(744,208,"right.bmp");
+        size = read(fdUsbCam, buff, 1024 * 1024);
+        filefd = open("temp.jpg", O_RDWR | O_CREAT,0666);
+        write(filefd, buff, size);
+        close(filefd);
+        display_jpg("temp.jpg",fbp,80,0,800,480,32);
+        send_data("temp.jpg",connfd);
+        puts("send finish");
+        sleep(1);
+    }
+    free(buff);
+
 }
