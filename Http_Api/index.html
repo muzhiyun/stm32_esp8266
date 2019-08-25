@@ -7,103 +7,163 @@
 	body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
 	</style>
 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=vV22rRRBUQAtmYTEzP1eBrKSABDNXGGN"></script>
+	<script src="https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js"></script>
 	<title>MuZhi</title>
-
-<script src="https://cdn.staticfile.org/jquery/3.4.0/jquery.min.js"></script>
-
-<script>
-
-</script>
-
 </head>
 <body>
 	<div id="allmap"></div>
-	<div id="div1"></div>
-
+	<div id="div1">
+		<!-- <input type="button" onclick="add_control();" value="切换地图类型" /> -->
+	</div>
 </body>
 </html>
 
 
 
 <script type="text/javascript">
-
 	// 百度地图API功能
-	var map = new BMap.Map("allmap",{mapType: BMAP_HYBRID_MAP});    // 创建Map实例
-	map.centerAndZoom("西安",15);      // 初始化地图,用城市名设置地图中心点
-	//map.centerAndZoom(new BMap.Point(116.404, 39.915), 11);  // 初始化地图,设置中心点坐标和地图级别
-	//添加地图类型控件
-	/*map.addControl(new BMap.MapTypeControl({
-		mapTypes:[
-            BMAP_NORMAL_MAP,
-            BMAP_HYBRID_MAP
-        ]}));	*/  
-	//map.setCurrentCity("重庆");          // 设置地图显示的城市 此项是必须设置的
+	var map = new BMap.Map("allmap",{mapType: BMAP_SATELLITE_MAP,enableMapClick:false});    
+	var mapType1 = new BMap.MapTypeControl(
+		{
+			mapTypes: [BMAP_NORMAL_MAP,BMAP_HYBRID_MAP,BMAP_SATELLITE_MAP],
+			anchor: BMAP_ANCHOR_TOP_LEFT
+		}
+	);
+	map.addControl(mapType1);          //添加地图切换按钮 2D图，混合图，卫星图
+
+	map.centerAndZoom("西安",19);      // 初始化地图,用城市名设置地图中心点
+
+	map.addEventListener("click",function(e){				//实现点击控制台输出经纬度
+		console.log(e.point.lng + "," + e.point.lat);
+	});
+
+	 var navigationControl = new BMap.NavigationControl({	//实现地图缩放定位控件
+    // 靠右上角位置
+    anchor: BMAP_ANCHOR_TOP_RIGHT,
+    // LARGE类型
+    type: BMAP_NAVIGATION_CONTROL_LARGE,
+    // 启用显示定位
+    enableGeolocation: true
+	});
+	map.addControl(navigationControl);
+	// 添加定位控件
+	var geolocationControl = new BMap.GeolocationControl();
+	geolocationControl.addEventListener("locationSuccess", function(e){
+	// 定位成功事件
+	var address = '';
+	address += e.addressComponent.province;
+	address += e.addressComponent.city;
+	address += e.addressComponent.district;
+	address += e.addressComponent.street;
+	address += e.addressComponent.streetNumber;
+	console.log("当前定位地址为：" + address);
+	});
+	geolocationControl.addEventListener("locationError",function(e){
+	// 定位失败事件
+	alert(e.message);
+	});
+	map.addControl(geolocationControl);
+
 	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 
 
-var jsonobj;
-page_num={};
-//$(document).ready(function(){
+	map.enableScrollWheelZoom();			//提供城市切换功能
+	map.enableInertialDragging();
 
-	//$.ajax({url:"data.json",dataType:"json"});
+	map.enableContinuousZoom();
 
+	var size = new BMap.Size(100, 10);
+	map.addControl(new BMap.CityListControl({
+	anchor: BMAP_ANCHOR_TOP_LEFT,
+	offset: size,
+	// 切换城市之间事件
+	// onChangeBefore: function(){
+	//    alert('before');
+	// },
+	// 切换城市之后事件
+	// onChangeAfter:function(){
+	//   alert('after');
+	// }
+	}));
+	
+	page_num={};		//定义全局变量 追备ajax异步请求api接口
+	//$(document).ready(function(){
 	$.ajax({
 
-　　　　url : 'http://*.*.*.*/test/echo.php', 　   //<!-- url  :请求地址 -->  
+　　　　url : 'http:// *.*.*.*/test/echo.php', 　   //<!-- url  :请求地址 -->  
 　　　　type : 'get',　　　　　　　　//<!--type ：请求类型:post/get --> 
 　　　　data : {　　　　　　　　　　　//<!--data ：发送给服务器的数据 -->      
-	　　　　　　　　password:"yiban"
-				//uUsername : u,　　　　　//　  <!-- 使用自己声明的对象 -->  
-　　　　　　　　//uPwd : $("#pwd").val()　//　　 <! -- 直接获取页面的对象 -->  
+	　　　　　　　　password:"****"
 　　　　　　},
 　　　　dataType : 'json',           //         <!--dataType:服务器返回的数据类型 text/xml/script/html/json/jsonp -->
 　　　　success: function(data){　　　//<!---回调函数 --> 
-
-　　　　　　//console.log(data);          //   <! -- 浏览器控制台显示返回内容（建议使用） -->
-			//var obj = JSON.parse(data);
-			page_num = data;
+			page_num = data;		//将返回结果赋值给全局变量
 			handle();
-			//for (var i = 0; i < data.length; i++) {
-        //result[i]表示获得第i个json对象即JSONObject
-        //result[i]通过.字段名称即可获得指定字段的值
-       
-    		//}
-　　　　　　//alert(obj);　　　　　　     //<! -- 弹框显示返回内容 -->
 　　　　　　}
 
 　　　　});
 
-    /*$("#div1").load("data.json",function(responseTxt,statusTxt,xhr){
-      if(statusTxt=="success")
-        alert("外部内容加载成功!");
-      if(statusTxt=="error")
-        alert("Error: "+xhr.status+": "+xhr.statusText);
-});*/
-//});
+
+	/*function add_control(){
+		if (clickflag==0)
+		{
+			map.addControl(mapType1);          //切换为混合图
+			clickflag = 1;
+		}
+		else
+		{
+			map.removeControl(mapType1);          //切换为混合图
+			clickflag = 0;
+		}
+	}*/
 
 
 
-	function addMarker(point,mess,link){
-	  var marker = new BMap.Marker(point);
-	  //onsole.log("start");
-	  map.addOverlay(marker);
+	function addline(point,pointnext)				//添加轨迹线函数
+	{
+		var polyline = new BMap.Polyline([
+	    point,pointnext
+	    ],{strokeColor:"red", strokeWeight:6, strokeOpacity:0.5}
+	    );
+		map.addOverlay(polyline);
+	}
 
-	var infoWindow = new BMap.InfoWindow("id:"+mess+"</br>详情:<a href=\"http://*.*.*.*/test"+link+"\">点我查看</a></br>预览:<img style='float:center;margin:4px' id='imgDemo' src='http://*.*.*.*/test"+link+"' width='139' height='104' title='缩略图'/>");  // 创建信息窗口对象 
-	marker.addEventListener("click", function(){          
-		map.openInfoWindow(infoWindow,point); //开启信息窗口
+	function addMarker(point,mess,link,time,id,x,y,h){			//添加标记点和信息窗函数
+		var marker = new BMap.Marker(point);
+		//onsole.log("start");
+		
+		var label = new BMap.Label(id, {
+                offset : new BMap.Size(5, 4)
+            }); 
+       label.setStyle({
+           background:'none',color:'#fff',border:'none'//只要对label样式进行设置就可达到在标注图标上显示数字的效果
+         });
+       marker.setLabel(label);//显示地理名称 a 
+		
+		map.addOverlay(marker);	//添加标注点完成
+
+
+		var infoWindow = new BMap.InfoWindow("拍摄点id："+mess+"</br>拍摄高度："+h+"</br>拍摄地点："+x+"&nbsp;"+y+"</br>拍摄时间："+time+"</br>详情:<a href=\"http:// *.*.*.*/test/"+link+"\" >点我查看</a></br>预览:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</br><img style='float:center;margin:4px' id='imgDemo' src='http:// *.*.*.*/test/"+link+"' width='139' height='104' title='缩略图'/>");  // 创建信息窗口对象 
+		marker.addEventListener("click", function(){          
+		map.openInfoWindow(infoWindow,point); //开启信息窗口 开启方式单击
 	});
 	}
 
 
-	// var bounds = map.getBounds();
-	// var sw = bounds.getSouthWest();
-	// var ne = bounds.getNorthEast();
-	function handle(){
-	for (var i = 0; i < page_num.length; i++) {
-	var point = new BMap.Point(page_num[i].x, page_num[i].y);
-	 //console.log(page_num[i].time);
-	addMarker(point,page_num[i].id,page_num[i].path);
+	function handle()		//ajax成功回调函数
+	{
+		for (var i = 0; i < page_num.length; i++) //添加标记点
+			{
+				var point = new BMap.Point(page_num[i].x, page_num[i].y);
+				 //console.log(page_num[i].time);
+				addMarker(point,page_num[i].id,page_num[i].path,page_num[i].time,i+1,page_num[i].x, page_num[i].y,page_num[i].h);
+			}
+		for(var i= 0;i<page_num.length-1;i++)	//两点之间添加标记线
+			{
 
-}
-}
+				var point = new BMap.Point(page_num[i].x,page_num[i].y);
+				var point_next = new BMap.Point(page_num[i+1].x,page_num[i+1].y);
+				addline(point,point_next);
+			}
+	}
 </script>
