@@ -1,6 +1,6 @@
 #include "http_post.h"
 
-#define SERVER "*.*.*.*"
+#define SERVER "123.207.155.16"
 //#define SERVER "192.168.2.166"
 
 int socket_init()
@@ -48,52 +48,94 @@ int send_data(char *filename,int connfd)
     char host[48];
     char len[20];
     char filenm[512];
-    char *cmd[15];
+    char *cmd[25];
+    int i = 0;
+    int body_length = 0;
     struct timeval tv;
     gettimeofday(&tv,NULL);
-
-
-    cmd[9] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";
-    
-    cmd[11] = "Content-Type: image/jpeg\r\n";
-    cmd[12] = "\r\n";
-    char *end = "\r\n------WebKitFormBoundaryd6NfgrZ24b1aKMpS--\r\n";
-
-
-    //sprintf(host,"Host: %s\r\n",SERVER);
-    sprintf(filenm,"Content-Disposition: form-data; name=\"file\"; filename=\"%lu.jpg\"\r\n",tv.tv_sec);
-    sprintf(len,"Content-Length: %lu\r\n",st.st_size+strlen(cmd[9])+strlen(filenm)+strlen(cmd[11])+strlen(cmd[12])+strlen(end));
-    cmd[0] = "POST /test/post.php HTTP/1.1\r\n";
-    cmd[1] = "Host: *.*.*.*\r\n";  //HOST
-    cmd[2] = "Connection: keep-alive\r\n";
-    cmd[3] = len;
-    //cmd[3] = "Content-Length: 31412\r\n";
-    //31412 31233 179
-    //39018 38839 
-    //cmd[4] = "Cache-Control: no-cache\r\n";
-    cmd[4] = "Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";
-    //cmd[5] = "Content-Type: application/octet-stream\r\n";
-    cmd[5] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n";
-    cmd[6] = "Accept-Encoding: gzip, deflate\r\n";
-    //cmd[7] = "Transfer-Encoding:null\r\n";
-    cmd[7] = "Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh-TW;q=0.7,zh;q=0.6\r\n";
-    cmd[8] = "\r\n";
-    cmd[10] = filenm;
-    
 
     time_t t;
 	time(&t);
 
+    /*模拟GPS数据*/
+    //根据时间戳生成可变的坐标
+    //1566740890
+    //108.947058
+    // 34.344497
+    // 
+
+    // 10
+    // 108.947116
+    // 34.344341                //1566703626  //3634.
+    gettimeofday(&tv,NULL);
+    double temp_time = (tv.tv_sec-1566740000);
+    temp_time = temp_time/100000;
+    
+
+    
+    char x[16]={0};
+    sprintf(x,"%.8f\r\n",(temp_time+108.947687-0.05));
+    char y[16]={0};
+    sprintf(y,"%.8f\r\n",(temp_time+34.344126-0.05));
+    char h[16]={0};
+    sprintf(h,"%.8f\r\n",(temp_time+88.87));
+
+
+    cmd[9] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";                        //为了计算Content-Length　先规划所有请求体，再设计请求头
+    cmd[10] = "Content-Disposition: form-data; name=\"x\"\r\n";
+    cmd[11] = "\r\n";
+    cmd[12] = x;//"108.947687\r\n";          //x
+    cmd[13] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";
+    cmd[14] = "Content-Disposition: form-data; name=\"y\"\r\n";
+    cmd[15] = "\r\n";
+    cmd[16] = y;//"34.344126\r\n";          //y
+    cmd[17] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";
+    cmd[18] = "Content-Disposition: form-data; name=\"h\"\r\n";
+    cmd[19] = "\r\n";
+    cmd[20] = h;//"88\r\n";          //h
+    cmd[21] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";                    
+            sprintf(filenm,"Content-Disposition: form-data; name=\"file\"; filename=\"%lu.jpg\"\r\n",tv.tv_sec);  //cmd[10]
+    cmd[22] = filenm;
+    cmd[23] = "Content-Type: image/jpeg\r\n";
+    cmd[24] = "\r\n";
+    
+
+    char *end = "\r\n------WebKitFormBoundaryd6NfgrZ24b1aKMpS--\r\n";       //end为最后发送的头
+    
+    
+    for (i=9;i<25;i++)          //统计body长度
+    {
+        body_length += strlen(cmd[i]);
+    }
+
+
+    sprintf(len,"Content-Length: %lu\r\n",st.st_size+body_length+strlen(end));  //cmd[3]
+
+    cmd[0] = "POST /test/post.php HTTP/1.1\r\n";
+    cmd[1] = "Host: 123.207.155.16\r\n";  //HOST
+    cmd[2] = "Connection: keep-alive\r\n";
+    cmd[3] = len;
+    cmd[4] = "Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";
+    cmd[5] = "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3\r\n";
+    cmd[6] = "Accept-Encoding: gzip, deflate\r\n";
+    cmd[7] = "Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh-TW;q=0.7,zh;q=0.6\r\n";
+    cmd[8] = "\r\n";
+    
+
 
     puts("-----------------------");
-    printf("%s",cmd[1]);
-    printf("%s",cmd[3]);
-    printf("%s",cmd[10]);
-    printf("%s",ctime(&t));
-    printf("time:%lu\n",tv.tv_sec);
+    printf("%s",cmd[1]);        //host
+    printf("%s",cmd[3]);        //Content-Length
+    printf("x:%s",cmd[12]);       //x
+    printf("y:%s",cmd[16]);       //y
+    printf("h:%s",cmd[20]);       //h
+    printf("%s",cmd[21]);         //filename
+    printf("%s",ctime(&t));     //正常时间
+    printf("time:%lu\n",tv.tv_sec); //时间戳
     puts("-----------------------");
-    int i = 0;
-    for(i=0;i<13;i++)
+    // close(connfd);
+    // exit(0);
+    for(i=0;i<25;i++)
     {
         send(connfd,cmd[i],strlen(cmd[i]),0);
     }
