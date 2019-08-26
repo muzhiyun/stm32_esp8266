@@ -1,39 +1,36 @@
 <?php
 $dir="image/";
+$num = 0;
 $file=scandir($dir);
 foreach ($file as $key) {
-	# code...
-	#echo "</br>---------";
-	#echo $key;
-	#echo "---------";
-	/*
-	if ($key!=NULL)
-	{
-		echo 1;
-	}
-	if ($key!=".")
-	{
-		echo 2;
-	}
-	if ($key!="..")
-	{
-		echo 3;
-	}
-	*/
 	if(preg_match('/.jpg$/',$key))
 	{
 		if ($key!=NULL&&$key!="."&&$key!="..")
 		{
-			//echo "ceshi";
-			echo "<img width=\"160\" height=\"160\" src=\"image\\";
-			#echo "";
-			echo $key;
-			//echo "http://192.168.1.1/tmp.jpg";
-			echo "\">";
-			#echo $key."</br>";
+			echo "<img width=\"10%\" height=\"20%\" src=\"image\\".$key."\">&emsp;";
+			$keylist[$num] = $key;
+			$num +=1;
+			if ($num==9)
+			{
+				echo "</br>";
+				$temp = 0;
+				for ($temp = 0;$temp<9;$temp++) {
+					$forblank = strlen($keylist[$temp]);
+					for($y=(30-$forblank)/2;$y>0;$y--)
+					{
+						echo "&nbsp;";                                                                       //##生成空格 对齐
+					}
+					echo "<a href=\"image/".$keylist[$temp]."\">".$keylist[$temp]."</a>";	
+					for($y=(30-$forblank)/2;$y>0;$y--)
+					{
+						echo "&nbsp;";                                                                       //##生成空格 对齐
+					}
+					echo "&nbsp;&nbsp;"; 
+				}
+				$num = 0;
+				echo "</br>";
+			}
 		}
 	}
 }
-	
-#var_dump($file);
 ?>

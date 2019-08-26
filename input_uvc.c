@@ -131,8 +131,8 @@ void videoLCD(int fdUsbCam,int connfd)
     void *buff = malloc(1024 * 1024);  //分配缓存足以容纳一帧图像
     int filefd = -1 ;
 
-    //while (1)
-    //{
+    while (1)
+    {
         paintBMP(0,208,"left.bmp");
         paintBMP(744,208,"right.bmp");
         size = read(fdUsbCam, buff, 1024 * 1024);
@@ -143,7 +143,7 @@ void videoLCD(int fdUsbCam,int connfd)
         send_data("temp.jpg",connfd);
         puts("send finish");
         sleep(1);
-    //}
+    }
     free(buff);
 
 }

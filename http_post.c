@@ -58,7 +58,7 @@ int send_data(char *filename,int connfd)
 	time(&t);
 
     /*模拟GPS数据*/
-    //根据时间戳生成可变的坐标
+/*    //根据时间戳生成可变的坐标
     //1566740890
     //108.947058
     // 34.344497
@@ -70,16 +70,43 @@ int send_data(char *filename,int connfd)
     gettimeofday(&tv,NULL);
     double temp_time = (tv.tv_sec-1566740000);
     temp_time = temp_time/100000;
-    
+    printf("%lf\n",temp_time);
 
     
     char x[16]={0};
-    sprintf(x,"%.8f\r\n",(temp_time+108.947687-0.05));
+    sprintf(x,"%.8f\r\n",(temp_time+108.947687-0.42702));
     char y[16]={0};
-    sprintf(y,"%.8f\r\n",(temp_time+34.344126-0.05));
+    sprintf(y,"%.8f\r\n",(temp_time+34.344126-0.42702));
     char h[16]={0};
     sprintf(h,"%.8f\r\n",(temp_time+88.87));
+    //108.951137 34.347576
+    //x:109.27015700  y:34.66659600
+*/
+    FILE *fp;
+	fp = fopen("gps.data", "r");
+	if (fp == NULL){
+		printf("Open File for read failed.\n");
+		exit(0);
+	}
+	double xd,yd,hd;
+	while (!feof(fp)){
+		fscanf(fp, "%lf%lf%lf", &xd, &yd, &hd);
+	}
+    char x[16]={0};
+    sprintf(x,"%.8f\r\n",(xd+0.00022));
+    char y[16]={0};
+    sprintf(y,"%.8f\r\n",(yd+0.00022));
+    char h[16]={0};
+    sprintf(h,"%.8f\r\n",(hd+0.87));
+	fclose(fp);
 
+    fp = fopen("gps.data", "w");
+	if (fp == NULL){
+		printf("Open File for write failed.\n");
+		exit(0);
+	}
+    fprintf(fp, "%s%s%s", &x, &y, &h);
+    fclose(fp);
 
     cmd[9] = "------WebKitFormBoundaryd6NfgrZ24b1aKMpS\r\n";                        //为了计算Content-Length　先规划所有请求体，再设计请求头
     cmd[10] = "Content-Disposition: form-data; name=\"x\"\r\n";
