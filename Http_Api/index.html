@@ -30,8 +30,9 @@
 		}
 	);
 	map.addControl(mapType1);          //添加地图切换按钮 2D图，混合图，卫星图
+	map.addControl(new BMap.ScaleControl()); //添加比例尺控件
 
-	map.centerAndZoom("西安",19);      // 初始化地图,用城市名设置地图中心点
+	map.centerAndZoom("西安",15);      // 初始化地图,用城市名设置地图中心点
 
 	map.addEventListener("click",function(e){				//实现点击控制台输出经纬度
 		console.log(e.point.lng + "," + e.point.lat);
@@ -45,7 +46,7 @@
     // 启用显示定位
     enableGeolocation: true
 	});
-	map.addControl(navigationControl);
+	map.addControl(navigationControl);	//平移缩放控件
 	// 添加定位控件
 	var geolocationControl = new BMap.GeolocationControl();
 	geolocationControl.addEventListener("locationSuccess", function(e){
@@ -62,7 +63,11 @@
 	// 定位失败事件
 	alert(e.message);
 	});
-	map.addControl(geolocationControl);
+	map.addControl(geolocationControl);	//定位控件
+
+	map.enableKeyboard();				//键盘控制控件
+	map.enableContinuousZoom();    // 开启连续缩放效果
+	map.enableInertialDragging();　// 开启惯性拖拽效果
 
 	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 
@@ -90,10 +95,10 @@
 	//$(document).ready(function(){
 	$.ajax({
 
-　　　　url : 'http:// *.*.*.*/test/echo.php', 　   //<!-- url  :请求地址 -->  
+　　　　url : 'http://123.207.155.16/test/echo.php', 　   //<!-- url  :请求地址 -->  
 　　　　type : 'get',　　　　　　　　//<!--type ：请求类型:post/get --> 
 　　　　data : {　　　　　　　　　　　//<!--data ：发送给服务器的数据 -->      
-	　　　　　　　　password:"****"
+	　　　　　　　　password:"yiban"
 　　　　　　},
 　　　　dataType : 'json',           //         <!--dataType:服务器返回的数据类型 text/xml/script/html/json/jsonp -->
 　　　　success: function(data){　　　//<!---回调函数 --> 
@@ -143,7 +148,7 @@
 		map.addOverlay(marker);	//添加标注点完成
 
 
-		var infoWindow = new BMap.InfoWindow("拍摄点id："+mess+"</br>拍摄高度："+h+"</br>拍摄地点："+x+"&nbsp;"+y+"</br>拍摄时间："+time+"</br>详情:<a href=\"http:// *.*.*.*/test/"+link+"\" >点我查看</a></br>预览:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</br><img style='float:center;margin:4px' id='imgDemo' src='http:// *.*.*.*/test/"+link+"' width='139' height='104' title='缩略图'/>");  // 创建信息窗口对象 
+		var infoWindow = new BMap.InfoWindow("拍摄点id："+mess+"</br>拍摄高度："+h+"</br>拍摄地点："+x+"&nbsp;"+y+"</br>拍摄时间："+time+"</br>详情:<a href=\"http://123.207.155.16/test/"+link+"\" >点我查看</a></br>预览:&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;</br><img style='float:center;margin:4px' id='imgDemo' src='http://123.207.155.16/test/"+link+"' width='139' height='104' title='缩略图'/>");  // 创建信息窗口对象 
 		marker.addEventListener("click", function(){          
 		map.openInfoWindow(infoWindow,point); //开启信息窗口 开启方式单击
 	});
